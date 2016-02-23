@@ -1,0 +1,65 @@
+
+title: "Getting recent co-authors from Pubmed"
+author: "Tim Read"
+date: 
+
+Exersise 1 Generating a non-redundant list of coathors 
+
+This is a problem I had to solve for an NSF application.  The solution was inspired by this blogpost http://davetang.org/muse/2013/10/31/querying-pubmed-using-r/.
+
+The key software is using the RISmed library, which allows you to access the NIH EUtils API Application Package Interface https://en.wikipedia.org/wiki/Application_programming_interface.  See this blog.http://www.ncbi.nlm.nih.gov/books/NBK25500/
+
+First, open the libraries and load the query
+
+library("RISmed")
+library("dplyr")
+res <- EUtilsSummary('read td', type='esearch', db='pubmed', mindate='2013', maxdate='2016')
+fetch <- EUtilsGet(res)
+
+
+Now use a for-loop to iteratively merge the first two columns####
+
+
+a_list = NULL
+for (i in 1:length(Author(fetch))){
+  if (i == 1) {a_list <- Author(fetch)[[1]][,1:2]}
+  else {
+    a_list <- dplyr::union(a_list,Author(fetch)[[i]][,1:2])
+  }
+}
+
+print(a_list)
+
+Not bad: a lot of co-authors.
+
+Exercise 2 - find and plot references containing the bacterium 'pandoraea' over a multi-year period
+
+Adapted from this blog entry http://www.r-bloggers.com/how-to-search-pubmed-with-rismed-package-in-r/
+
+#first how many total articles containing keyword?
+res3 <- EUtilsSummary('pandoraea', type='esearch', db='pubmed')
+summary(res3)
+fetch3 <-  EUtilsGet(res3)
+y <- YearPubmed(fetch3)
+
+library(ggplot2)
+date()
+count<-table(y)
+count<-as.data.frame(count)
+names(count)<-c("Year", "Counts")
+# num <- data.frame(Year=count$Year, Counts=cumsum(count$Counts))
+# num$g <- "g"
+# names(num) <- c("Year", "Counts", "g")
+q <- ggplot(data=count, aes(x=Year, y=Counts))
+q <- q +  geom_bar(stat="identity")
+q <- q + ggtitle(paste("PubMed articles containing the word pandoraea")) +
+     ylab("Number of articles") +
+     xlab(paste("Year in Query date: ", Sys.time(), sep="")) +
+     labs(colour="") +
+     theme_bw()
+q
+
+sessionInfo()
+
+
+
