@@ -1,1 +1,1 @@
-# Feb23_2016
+Materials for IBS574 class n "Reproducible Research"
