@@ -17,7 +17,6 @@ res <- EUtilsSummary('read td', type='esearch', db='pubmed', mindate='2013', max
 fetch <- EUtilsGet(res)
 
 
-Now use a for-loop to iteratively merge the first two columns####
 
 
 a_list = NULL
